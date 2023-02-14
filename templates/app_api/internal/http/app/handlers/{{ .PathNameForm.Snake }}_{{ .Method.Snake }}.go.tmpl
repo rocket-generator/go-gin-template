@@ -10,7 +10,7 @@ import (
 	"{{ .PackageName }}/internal/http/app/responses"
 )
 
-// {{ .HandlerName }} ... endpoint for {{ .Method }} {{ .Path }}
+// {{ .HandlerName }} ... endpoint for {{ .Method.Original }} {{ .Path }}
 func (handler *Handler) {{ .HandlerName }}(c *gin.Context) {
 {{- range .Parameters }}
 {{- if eq .In "path" }}
