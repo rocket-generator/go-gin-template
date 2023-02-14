@@ -23,3 +23,10 @@
  ┃ ┣ 📂api
  ┃ ┣ 📂database
 ```
+
+### How to run app server
+
+```bash
+# Run app server
+$ go run application.go app serve
+```

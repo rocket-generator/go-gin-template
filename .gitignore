@@ -4,7 +4,7 @@ Thumbs.db
 *.key
 *.pem
 # Env
-.env*
+.env
 
 # Builds
 bin/

@@ -1,4 +1,4 @@
-package serve
+package bootstrap
 
 import (
 	"github.com/gin-gonic/gin"
