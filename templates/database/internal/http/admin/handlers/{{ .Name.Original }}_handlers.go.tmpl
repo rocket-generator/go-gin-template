@@ -1,0 +1,153 @@
+package handlers
+
+import (
+	adminRequest "{{ .PackageName }}/internal/http/admin/requests"
+	adminResponse "{{ .PackageName }}/internal/http/admin/responses"
+	commonResponse "{{ .PackageName }}/internal/http/common/responses"
+	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"strconv"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+// {{ .Name.Plural.Title }}Get ... endpoint for GET /{{ .Name.Original }}
+func (handler *Handler) {{ .Name.Plural.Title }}Get(c *gin.Context) {
+	// http://my.api.url/posts?_sort=title&_order=ASC&_start=0&_end=24&title=bar
+	offset, err := strconv.Atoi(c.DefaultQuery("_start", "0"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+	end, err := strconv.Atoi(c.DefaultQuery("_end", "20"))
+	if err != nil || end < 0 {
+		end = 20
+	}
+	limit := end - offset
+	if err != nil || limit < 1 || limit > 100 {
+		limit = 20
+	}
+	order := strings.ToLower(c.DefaultQuery("_sort", "id"))
+	direction := strings.ToLower(c.DefaultQuery("_order", "ASC"))
+	if err != nil {
+		handler.logger.Error("Error parsing sort", zap.Error(err))
+		order = "id"
+		direction = "asc"
+	}
+	found := false
+	for _, column := range []string{
+		"id",
+		"email",
+	} {
+		if column == order {
+			found = true
+		}
+	}
+	if !found {
+		order = "id"
+	}
+
+	data, count, err := handler.{{ .Name.Singular.Camel }}Repository.Get(
+		c,
+		nil,
+		order,
+		direction,
+		int64(offset),
+		int64(limit),
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+
+	c.Writer.Header().Set("X-Total-Count", strconv.FormatInt(count, 10))
+
+	response := adminResponse.New{{ .Name.Plural.Title }}(data)
+	c.JSON(http.StatusOK, response)
+}
+
+// {{ .Name.Singular.Title }}Get ... endpoint for GET /{{ .Name.Original }}/{id}
+func (handler *Handler) {{ .Name.Singular.Title }}Get(c *gin.Context) {
+
+	idString := c.Param("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, commonResponse.NewInternalServerError(err))
+		return
+	}
+	model, err := handler.{{ .Name.Singular.Camel }}Repository.FindByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+	response := adminResponse.New{{ .Name.Singular.Title }}(*model)
+	c.JSON(http.StatusOK, response)
+}
+
+// {{ .Name.Plural.Title }}Post ... endpoint for POST /{{ .Name.Original }}
+func (handler *Handler) {{ .Name.Plural.Title }}Post(c *gin.Context) {
+	var request requests.{{ .Name.Singular.Title }}Create
+	if err := c.Bind(&request); err != nil {
+		c.JSON(http.StatusBadRequest, commonResponse.NewInvalidParameterErrorStatus(err))
+		return
+	}
+	resultModel, err := handler.{{ .Name.Singular.Camel }}Service.Create{{ .Name.Singular.Title }}(c, request.Name, request.Email, request.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+	response := adminResponse.New{{ .Name.Singular.Title }}(*resultModel)
+	c.JSON(http.StatusCreated, response)
+}
+
+// {{ .Name.Singular.Title }}Put ... endpoint for PUT /{{ .Name.Original }}/{id}
+func (handler *Handler) {{ .Name.Singular.Title }}Put(c *gin.Context) {
+	idString := c.Param("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, commonResponse.NewInternalServerError(err))
+		return
+	}
+	_, err = handler.{{ .Name.Singular.Camel }}Repository.FindByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+	var update requests.{{ .Name.Singular.Title }}Update
+	if err := c.Bind(&update); err != nil {
+		c.JSON(http.StatusBadRequest, commonResponse.NewInvalidParameterErrorStatus(err))
+		return
+	}
+
+	resultModel, err := handler.{{ .Name.Singular.Camel }}Service.Update{{ .Name.Singular.Title }}(c, id, update.Name, update.Email, update.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+	response := adminResponse.New{{ .Name.Singular.Title }}(*resultModel)
+	c.JSON(http.StatusCreated, response)
+}
+
+// {{ .Name.Singular.Title }}Delete ... endpoint for DELETE /{{ .Name.Original }}/{id}
+func (handler *Handler) {{ .Name.Singular.Title }}Delete(c *gin.Context) {
+	idString := c.Param("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, commonResponse.NewInternalServerError(err))
+		return
+	}
+	_, err = handler.{{ .Name.Singular.Camel }}Repository.FindByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+
+	err = handler.{{ .Name.Singular.Camel }}Service.Delete{{ .Name.Singular.Title }}(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
+		return
+	}
+	response := commonResponse.NewSuccessStatus()
+	c.JSON(http.StatusOK, response)
+}

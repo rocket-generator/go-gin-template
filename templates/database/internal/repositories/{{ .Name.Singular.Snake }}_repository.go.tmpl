@@ -1,0 +1,155 @@
+package repositories
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"github.com/d78io/redimir-backend/internal/models"
+	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"go.uber.org/zap"
+)
+
+// BrandRepositoryInterface ...
+type BrandRepositoryInterface interface {
+	FindByID(ctx context.Context, id uuid.UUID) (*models.Brand, error)
+	FindAvailableByID(ctx context.Context, id uuid.UUID) (*models.Brand, error)
+	Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error)
+	GetAvailableBrands(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error)
+	Save(ctx context.Context, model models.Brand) (*models.Brand, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+// BrandRepository ...
+type BrandRepository struct {
+	logger   *zap.Logger
+	database *bun.DB
+}
+
+func (repository *BrandRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.Brand, error) {
+	var model models.Brand
+
+	q := repository.database.
+		NewSelect().
+		Model(&model).
+		Relation("Images").
+		Relation("LogoImages").
+		Where("? = ?", bun.Ident("brands.id"), id)
+	err := q.Scan(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &model, nil
+}
+
+func (repository *BrandRepository) FindAvailableByID(ctx context.Context, id uuid.UUID) (*models.Brand, error) {
+	var model models.Brand
+
+	q := repository.database.
+		NewSelect().
+		Model(&model).
+		Relation("Images").
+		Relation("LogoImages").
+		Where("? = ?", bun.Ident("brands.id"), id)
+	q = WhereCurrentlyAvailable("brands", q)
+	err := q.Scan(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &model, nil
+}
+
+// Get ... Get Brand List
+func (repository *BrandRepository) Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error) {
+	_models := &[]models.Brand{}
+	if direction != "desc" {
+		direction = "asc"
+	}
+	q := repository.database.
+		NewSelect().
+		Model(_models).
+		Relation("Images").
+		Relation("LogoImages")
+	if filters != nil {
+		q = ApplyFilters("brands", q, *filters)
+	}
+
+	q = q.Limit(int(limit)).Offset(int(offset)).Order(order + " " + direction)
+	count, err := q.ScanAndCount(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, 0, nil
+		}
+		return nil, 0, err
+	}
+
+	return _models, int64(count), nil
+}
+
+// GetAvailableBrands ... Get Brand List
+func (repository *BrandRepository) GetAvailableBrands(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error) {
+	_models := &[]models.Brand{}
+	if direction != "desc" {
+		direction = "asc"
+	}
+	q := repository.database.
+		NewSelect().
+		Model(_models).
+		Relation("Images").
+		Relation("LogoImages")
+	q = WhereCurrentlyAvailable("brands", q)
+	if filters != nil {
+		q = ApplyFilters("brands", q, *filters)
+	}
+
+	q = q.Limit(int(limit)).Offset(int(offset)).Order(order + " " + direction)
+	count, err := q.ScanAndCount(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, 0, nil
+		}
+		return nil, 0, err
+	}
+
+	return _models, int64(count), nil
+
+}
+
+// Save ... Save Brand
+func (repository *BrandRepository) Save(ctx context.Context, model models.Brand) (*models.Brand, error) {
+	if model.ID == uuid.Nil {
+		_, err := repository.database.NewInsert().Model(&model).Returning("*").Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		_, err := repository.database.NewUpdate().Model(&model).Returning("*").Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model, nil
+}
+
+func (repository *BrandRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	_, err := repository.database.NewDelete().
+		Where("? = ?", bun.Ident("brands.id"), id).Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// NewBrandRepository ... Create new repository
+func NewBrandRepository(logger *zap.Logger, database *bun.DB) BrandRepositoryInterface {
+	return &BrandRepository{logger: logger, database: database}
+}

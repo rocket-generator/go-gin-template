@@ -1,0 +1,46 @@
+package responses
+
+import "{{ .PackageName }}/internal/models"
+
+// {{ .Name.Singular.Title }} ... {{ .Description }}
+type {{ .Name.Singular.Title }} struct {
+{{- range .Columns }}
+{{ if .APIReturnable }}    {{.ObjectName}} {{.APIObjectType}} `json:"{{.Name.Original }}"`{{ end -}}
+{{ end }}
+    CreatedAt int64 `json:"created_at"`
+    UpdatedAt int64 `json:"updated_at"`
+}
+
+// {{ .Name.Plural.Title }} ... response for multiple entities
+type {{ .Name.Plural.Title }} []{{ .Name.Singular.Title }}
+
+// New{{ .Name.Singular.Title }} ... Create new {{ .Name.Singular.Title }} response
+func New{{ .Name.Singular.Title }}(model models.{{ .Name.Singular.Title }}) *{{ .Name.Singular.Title }} {
+	response := &{{ .Name.Singular.Title }}{
+{{- range .Columns }}
+{{- if not .IsSystemUseColumn }}
+{{- if eq .ObjectType "decimal.Decimal" }}
+{{ if .APIReturnable }}		{{.ObjectName}}: model.{{.ObjectName}}.String(),{{ end -}}
+{{- else if eq .ObjectType "datatypes.JSON"}}
+{{ if .APIReturnable }}		{{.ObjectName}}: string(model.{{.ObjectName}}),{{ end -}}
+{{ else }}
+{{ if .APIReturnable }}		{{.ObjectName}}: model.{{.ObjectName}},{{ end -}}
+{{ end -}}
+{{- end -}}
+{{ end }}
+		CreatedAt: model.CreatedAt.Unix(),
+        UpdatedAt: model.UpdatedAt.Unix(),
+	}
+	return response
+}
+
+// New{{ .Name.Plural.Title }} ... Create new {{ .Name.Plural.Title }} response
+func New{{ .Name.Plural.Title }}(models *[]models.{{ .Name.Singular.Title }}) {{ .Name.Plural.Title }} {
+	response := {{ .Name.Plural.Title }}{}
+	for _, model := range *models {
+		response = append(response, *New{{ .Name.Singular.Title }}(model))
+	}
+
+	return response
+}
+
