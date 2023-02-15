@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 {{- if ne .RequestSchemaName.Original "" }}
-	"{{ .PackageName }}/internal/http/app/requests"
+	"{{ .OrganizationName }}/internal/http/app/requests"
 {{- end }}
-	"{{ .PackageName }}/internal/http/app/responses"
+	"{{ .OrganizationName }}/internal/http/app/responses"
 )
 
 // {{ .PathName.Default.Title }}{{ .Method.Title }} ... endpoint for {{ .Method.Original }} {{ .Path }}
