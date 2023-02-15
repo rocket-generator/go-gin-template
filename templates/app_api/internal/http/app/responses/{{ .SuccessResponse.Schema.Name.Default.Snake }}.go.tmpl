@@ -1,0 +1,15 @@
+package responses
+
+// {{ .SuccessResponse.Schema.Name.Default.Title }} ... {{ .Description }}
+type {{ .SuccessResponse.Schema.Name.Default.Title }} struct {
+{{- range .SuccessResponse.Schema.Properties}}
+{{ .Name.Default.Title }} {{if eq .Required false }}*{{end}}{{.Type}} `json:"{{ .Name.Default.Snake }}"`
+{{- end }}
+}
+
+// New{{ .SuccessResponse.Schema.Name.Default.Title }} ... Create new {{ .SuccessResponse.Schema.Name.Default.Title }} response
+func New{{ .Name.Default.Title }}() *{{ .Name.Default.Title }} {
+response := &{{ .Name.Default.Title }}{
+}
+return response
+}

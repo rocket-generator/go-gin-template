@@ -1,0 +1,8 @@
+package requests
+
+// {{ .RequestSchema.Name.Default.Name.Title }} ... {{ .Description }}
+type {{ .RequestSchema.Name.Default.Name.Title }} struct {
+{{- range .Properties}}
+	{{.Name.Default.Title}} {{if eq .Required false }}*{{end}}{{.Type}} `json:"{{.Name.Default.Snake}}"`
+{{- end }}
+}
