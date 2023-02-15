@@ -21,7 +21,7 @@ func (handler *Handler) {{ .PathName.Default.Title }}{{ .Method.Title }}(ctx *gi
 {{ end }}
 {{- if ne .RequestSchemaName.Original "" }}
 	var update requests.{{ .RequestSchemaName.Default.Title }}
-	if err := c.ShouldBindJSON(&update); err != nil {
+	if err := ctx.ShouldBindJSON(&update); err != nil {
 		ctx.JSON(http.StatusInternalServerError, responses.NewInvalidParameterErrorStatus(err))
 		return
 	}
