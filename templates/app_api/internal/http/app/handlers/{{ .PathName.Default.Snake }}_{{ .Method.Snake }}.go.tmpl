@@ -10,8 +10,8 @@ import (
 	"{{ .PackageName }}/internal/http/app/responses"
 )
 
-// {{ .PathNameForm.Title }}{{ .Method.Title }} ... endpoint for {{ .Method.Original }} {{ .Path }}
-func (handler *Handler) {{ .PathNameForm.Title }}{{ .Method.Title }}(ctx *gin.Context) {
+// {{ .PathName.Default.Title }}{{ .Method.Title }} ... endpoint for {{ .Method.Original }} {{ .Path }}
+func (handler *Handler) {{ .PathName.Default.Title }}{{ .Method.Title }}(ctx *gin.Context) {
 {{- range .Parameters }}
 {{- if eq .In "path" }}
     _ = ctx.Param("{{ .Name.Original }}")
