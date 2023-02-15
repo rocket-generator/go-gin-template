@@ -8,8 +8,8 @@ type {{ .SuccessResponse.Schema.Name.Default.Title }} struct {
 }
 
 // New{{ .SuccessResponse.Schema.Name.Default.Title }} ... Create new {{ .SuccessResponse.Schema.Name.Default.Title }} response
-func New{{ .Name.Default.Title }}() *{{ .Name.Default.Title }} {
-response := &{{ .Name.Default.Title }}{
+func New{{ .SuccessResponse.Schema.Name.Default.Title }}() *{{ .SuccessResponse.Schema.Name.Default.Title }} {
+response := &{{ .SuccessResponse.Schema.Name.Default.Title }}{
 }
 return response
 }
