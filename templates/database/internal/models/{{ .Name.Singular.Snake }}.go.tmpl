@@ -1,0 +1,54 @@
+package models
+
+import (
+	"time"
+
+	"github.com/bxcodec/faker/v3"
+{{- if .HasJSON }}
+    "gorm.io/datatypes"
+{{ end }}
+{{- if .HasDecimal }}
+    "github.com/shopspring/decimal"
+{{ end }}
+)
+
+// {{ .Name.Singular.Title }} ... {{ .Description }}
+type {{ .Name.Singular.Title }} struct {
+	CreatedAt      time.Time `gorm:"column:created_at" json:"createdAt"`
+	UpdatedAt      time.Time `gorm:"column:updated_at" json:"updatedAt"`
+{{- range .Columns}}
+    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+{{- end }}
+{{- range .Relations}}
+{{- if eq .RelationType "belongsTo" }}
+    {{ .ObjectName }} {{if .MultipleEntities }}[]{{end}}{{ .Entity.Name.Singular.Title }}
+{{- end -}}
+{{- end }}
+}
+
+// TableName sets the insert table name for this struct type
+func (entity *{{ .Name.Singular.Title }}) TableName() string {
+	return "{{ .Name.Original }}"
+}
+
+// GetFake{{ .Name.Singular.Title }} ... get fake {{ .Name.Singular.Title }} model
+func GetFake{{ .Name.Singular.Title }}() (*{{ .Name.Singular.Title }}, error) {
+	entity := &{{ .Name.Singular.Title }}{}
+	err := faker.FakeData(entity)
+
+	if err != nil {
+		return nil, err
+	}
+
+	entity.CreatedAt = time.Now()
+	entity.UpdatedAt = time.Now()
+
+{{- range .Relations}}
+{{- if eq .RelationType "belongsTo" }}
+    {{ .Entity.Name.Singular.Camel }}, _ := GetFake{{ .ObjectName }}()
+    entity.{{ .ObjectName }} = *{{ .Entity.Name.Singular.Camel }}
+{{- end -}}
+{{- end }}
+
+	return entity, nil
+}

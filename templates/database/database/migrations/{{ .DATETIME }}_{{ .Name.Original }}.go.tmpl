@@ -1,0 +1,52 @@
+package migrations
+
+import (
+	"context"
+	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"time"
+)
+
+type AdminUser struct {
+	ID        uuid.UUID `bun:",pk,type:uuid,nullzero,notnull,default:uuid_generate_v4()"`
+	CreatedAt time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
+{{- range .Columns}}
+    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+{{- end }}
+
+}
+
+func init() {
+	registerCreateModelMigrationFor{{ .Name.Default.Title }}(&{{ .Name.Default.Title }}{})
+}
+
+func registerCreateModelMigrationFor{{ .Name.Default.Title }}(model interface{}) {
+
+	up := func(ctx context.Context, db *bun.DB) error {
+		if _, err := db.
+			NewCreateTable().
+			Model(model).
+			IfNotExists().
+			WithForeignKeys().
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	down := func(ctx context.Context, db *bun.DB) error {
+		if _, err := db.
+			NewDropTable().
+			Model(model).
+			IfExists().
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	Migrations.MustRegister(up, down)
+}

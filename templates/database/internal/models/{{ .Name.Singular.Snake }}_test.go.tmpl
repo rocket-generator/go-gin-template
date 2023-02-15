@@ -1,0 +1,16 @@
+package models
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+// TestGetFake{{ .Name.Singular.Title }} ... check fake model generator function
+func TestGetFake{{ .Name.Singular.Title }}(t *testing.T) {
+	t.Run("Get Fake {{ .Name.Singular.Title }}", func(t *testing.T) {
+		model, err := GetFake{{ .Name.Singular.Title }}()
+		assert.NoError(t, err, "GetFake{{ .Name.Singular.Title }} should not return error")
+		assert.NotNil(t, model, "GetFake{{ .Name.Singular.Title }} should return fake {{ .Name.Singular.Title }}")
+	})
+}

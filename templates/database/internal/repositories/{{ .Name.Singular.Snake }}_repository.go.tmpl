@@ -10,31 +10,28 @@ import (
 	"go.uber.org/zap"
 )
 
-// BrandRepositoryInterface ...
-type BrandRepositoryInterface interface {
-	FindByID(ctx context.Context, id uuid.UUID) (*models.Brand, error)
-	FindAvailableByID(ctx context.Context, id uuid.UUID) (*models.Brand, error)
-	Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error)
-	GetAvailableBrands(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error)
-	Save(ctx context.Context, model models.Brand) (*models.Brand, error)
+// {{ .Name.Singular.Title }}RepositoryInterface ...
+type {{ .Name.Singular.Title }}RepositoryInterface interface {
+	FindByID(ctx context.Context, id uuid.UUID) (*models.{{ .Name.Singular.Title }}, error)
+	Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error)
+	GetAvailable{{ .Name.Singular.Title }}s(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error)
+	Save(ctx context.Context, model models.{{ .Name.Singular.Title }}) (*models.{{ .Name.Singular.Title }}, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
-// BrandRepository ...
-type BrandRepository struct {
+// {{ .Name.Singular.Title }}Repository ...
+type {{ .Name.Singular.Title }}Repository struct {
 	logger   *zap.Logger
 	database *bun.DB
 }
 
-func (repository *BrandRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.Brand, error) {
-	var model models.Brand
+func (repository *{{ .Name.Singular.Title }}Repository) FindByID(ctx context.Context, id uuid.UUID) (*models.{{ .Name.Singular.Title }}, error) {
+	var model models.{{ .Name.Singular.Title }}
 
 	q := repository.database.
 		NewSelect().
 		Model(&model).
-		Relation("Images").
-		Relation("LogoImages").
-		Where("? = ?", bun.Ident("brands.id"), id)
+		Where("? = ?", bun.Ident("{{ .Name.Plural.Snake }}.id"), id)
 	err := q.Scan(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -46,40 +43,17 @@ func (repository *BrandRepository) FindByID(ctx context.Context, id uuid.UUID) (
 	return &model, nil
 }
 
-func (repository *BrandRepository) FindAvailableByID(ctx context.Context, id uuid.UUID) (*models.Brand, error) {
-	var model models.Brand
-
-	q := repository.database.
-		NewSelect().
-		Model(&model).
-		Relation("Images").
-		Relation("LogoImages").
-		Where("? = ?", bun.Ident("brands.id"), id)
-	q = WhereCurrentlyAvailable("brands", q)
-	err := q.Scan(ctx)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return &model, nil
-}
-
-// Get ... Get Brand List
-func (repository *BrandRepository) Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error) {
-	_models := &[]models.Brand{}
+// Get ... Get {{ .Name.Singular.Title }} List
+func (repository *{{ .Name.Singular.Title }}Repository) Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error) {
+	_models := &[]models.{{ .Name.Singular.Title }}{}
 	if direction != "desc" {
 		direction = "asc"
 	}
 	q := repository.database.
 		NewSelect().
-		Model(_models).
-		Relation("Images").
-		Relation("LogoImages")
+		Model(_models)
 	if filters != nil {
-		q = ApplyFilters("brands", q, *filters)
+		q = ApplyFilters("{{ .Name.Plural.Snake }}", q, *filters)
 	}
 
 	q = q.Limit(int(limit)).Offset(int(offset)).Order(order + " " + direction)
@@ -94,20 +68,18 @@ func (repository *BrandRepository) Get(ctx context.Context, filters *[]Filter, o
 	return _models, int64(count), nil
 }
 
-// GetAvailableBrands ... Get Brand List
-func (repository *BrandRepository) GetAvailableBrands(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.Brand, int64, error) {
-	_models := &[]models.Brand{}
+// GetAvailable{{ .Name.Singular.Title }}s ... Get {{ .Name.Singular.Title }} List
+func (repository *{{ .Name.Singular.Title }}Repository) GetAvailable{{ .Name.Singular.Title }}s(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error) {
+	_models := &[]models.{{ .Name.Singular.Title }}{}
 	if direction != "desc" {
 		direction = "asc"
 	}
 	q := repository.database.
 		NewSelect().
-		Model(_models).
-		Relation("Images").
-		Relation("LogoImages")
-	q = WhereCurrentlyAvailable("brands", q)
+		Model(_models)
+	q = WhereCurrentlyAvailable("{{ .Name.Plural.Snake }}", q)
 	if filters != nil {
-		q = ApplyFilters("brands", q, *filters)
+		q = ApplyFilters("{{ .Name.Plural.Snake }}", q, *filters)
 	}
 
 	q = q.Limit(int(limit)).Offset(int(offset)).Order(order + " " + direction)
@@ -123,8 +95,8 @@ func (repository *BrandRepository) GetAvailableBrands(ctx context.Context, filte
 
 }
 
-// Save ... Save Brand
-func (repository *BrandRepository) Save(ctx context.Context, model models.Brand) (*models.Brand, error) {
+// Save ... Save {{ .Name.Singular.Title }}
+func (repository *{{ .Name.Singular.Title }}Repository) Save(ctx context.Context, model models.{{ .Name.Singular.Title }}) (*models.{{ .Name.Singular.Title }}, error) {
 	if model.ID == uuid.Nil {
 		_, err := repository.database.NewInsert().Model(&model).Returning("*").Exec(ctx)
 		if err != nil {
@@ -139,9 +111,9 @@ func (repository *BrandRepository) Save(ctx context.Context, model models.Brand)
 	return &model, nil
 }
 
-func (repository *BrandRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (repository *{{ .Name.Singular.Title }}Repository) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := repository.database.NewDelete().
-		Where("? = ?", bun.Ident("brands.id"), id).Exec(ctx)
+		Where("? = ?", bun.Ident("{{ .Name.Plural.Snake }}.id"), id).Exec(ctx)
 
 	if err != nil {
 		return err
@@ -149,7 +121,7 @@ func (repository *BrandRepository) Delete(ctx context.Context, id uuid.UUID) err
 	return nil
 }
 
-// NewBrandRepository ... Create new repository
-func NewBrandRepository(logger *zap.Logger, database *bun.DB) BrandRepositoryInterface {
-	return &BrandRepository{logger: logger, database: database}
+// New{{ .Name.Singular.Title }}Repository ... Create new repository
+func New{{ .Name.Singular.Title }}Repository(logger *zap.Logger, database *bun.DB) {{ .Name.Singular.Title }}RepositoryInterface {
+	return &{{ .Name.Singular.Title }}Repository{logger: logger, database: database}
 }
