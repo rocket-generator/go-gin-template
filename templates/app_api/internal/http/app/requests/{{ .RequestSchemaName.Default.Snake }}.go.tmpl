@@ -2,7 +2,7 @@ package requests
 {{ if ne .RequestSchema nil }}
 // {{ .RequestSchema.Name.Default.Title }} ... {{ .Description }}
 type {{ .RequestSchema.Name.Default.Title }} struct {
-{{- range .Properties}}
+{{- range .RequestSchema.Properties}}
 	{{.Name.Default.Title}} {{if eq .Required false }}*{{end}}{{if eq .Type "array" }}[]{{.ArrayItemName}}{{ else }}{{.Type}}{{ end}} `json:"{{.Name.Default.Snake}}"`
 {{- end }}
 }
