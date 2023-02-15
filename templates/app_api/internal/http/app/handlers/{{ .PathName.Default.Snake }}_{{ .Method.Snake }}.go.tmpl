@@ -29,7 +29,7 @@ func (handler *Handler) {{ .PathName.Default.Title }}{{ .Method.Title }}(ctx *gi
 
 {{- range .Responses -}}
 {{- if eq .Success true }}
-    response := responses.{{ .Schema.Name.Title }}{}
+    response := responses.{{ .Schema.Name.Default.Title }}{}
     ctx.JSON(http.StatusOK, response)
 {{- end -}}
 {{- end }}
