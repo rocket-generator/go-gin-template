@@ -20,12 +20,12 @@ type {{ .Name.Singular.Title }} struct {
 	UpdatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
 {{- if not .Primary }}
-    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+    {{ .Name.Default.Title }} {{ .DataType.Default.Title }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
 {{- end }}
 {{- end }}
 {{- range .Relations}}
 {{- if eq .RelationType "belongsTo" }}
-    {{ .ObjectName }} {{if .MultipleEntities }}[]{{end}}{{ .Entity.Name.Singular.Title }}
+    {{ .Name.Default.Title }} {{if .MultipleEntities }}[]{{end}}{{ .Entity.Name.Singular.Title }}
 {{- end -}}
 {{- end }}
 }
@@ -44,8 +44,8 @@ func GetFake{{ .Name.Singular.Title }}() (*{{ .Name.Singular.Title }}, error) {
 
 {{- range .Relations}}
 {{- if eq .RelationType "belongsTo" }}
-    {{ .Entity.Name.Singular.Camel }}, _ := GetFake{{ .ObjectName }}()
-    entity.{{ .ObjectName }} = *{{ .Entity.Name.Singular.Camel }}
+    {{ .Entity.Name.Singular.Camel }}, _ := GetFake{{ .Name.Default.Title }}()
+    entity.{{ .Name.Default.Title }} = *{{ .Entity.Name.Singular.Camel }}
 {{- end -}}
 {{- end }}
 
