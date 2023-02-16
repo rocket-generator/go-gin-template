@@ -1,0 +1,22 @@
+package repositories
+
+import (
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/d78io/redimir-backend/pkg/database"
+	"github.com/d78io/redimir-backend/pkg/logger"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+func create{{ .Name.Singular.Title }}RepositoryWithMockDB() ({{ .Name.Singular.Title }}RepositoryInterface, sqlmock.Sqlmock) {
+	db, mock, _ := database.GetMockDB()
+	repository := New{{ .Name.Singular.Title }}Repository(logger.NewTestLogger(), db)
+	return repository, mock
+}
+
+func TestNew{{ .Name.Singular.Title }}Repository(t *testing.T) {
+	t.Run("Create {{ .Name.Singular.Title }}Repository", func(t *testing.T) {
+		repository, _ := create{{ .Name.Singular.Title }}RepositoryWithMockDB()
+		assert.NotNil(t, repository)
+	})
+}

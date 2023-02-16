@@ -1,0 +1,36 @@
+package repositories
+
+import (
+	"context"
+	"github.com/d78io/redimir-backend/internal/models"
+	"github.com/google/uuid"
+)
+
+// Mock{{ .Name.Singular.Title }}Repository ...
+type Mock{{ .Name.Singular.Title }}Repository struct {
+}
+
+func (repository *Mock{{ .Name.Singular.Title }}Repository) FindByID(ctx context.Context, id uuid.UUID) (*models.{{ .Name.Singular.Title }}, error) {
+	model, _ := models.GetFake{{ .Name.Singular.Title }}()
+	model.ID = id
+	return model, nil
+}
+
+func (repository *Mock{{ .Name.Singular.Title }}Repository) Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error) {
+	model01, _ := models.GetFake{{ .Name.Singular.Title }}()
+	model02, _ := models.GetFake{{ .Name.Singular.Title }}()
+	return &[]models.{{ .Name.Singular.Title }}{*model01, *model02}, 2, nil
+}
+
+func (repository *Mock{{ .Name.Singular.Title }}Repository) Save(ctx context.Context, model models.{{ .Name.Singular.Title }}) (*models.{{ .Name.Singular.Title }}, error) {
+	return &model, nil
+}
+
+func (repository *Mock{{ .Name.Singular.Title }}Repository) Delete(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+// DeleteByFilters ... Delete {{ .Name.Singular.Title }}
+func (repository *Mock{{ .Name.Singular.Title }}Repository) DeleteByFilters(ctx context.Context, filters *[]Filter) error {
+	return nil
+}

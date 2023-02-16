@@ -14,9 +14,9 @@ import (
 type {{ .Name.Singular.Title }}RepositoryInterface interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*models.{{ .Name.Singular.Title }}, error)
 	Get(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error)
-	GetAvailable{{ .Name.Singular.Title }}s(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error)
 	Save(ctx context.Context, model models.{{ .Name.Singular.Title }}) (*models.{{ .Name.Singular.Title }}, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+    DeleteByFilters(ctx context.Context, filters *[]Filter) error
 }
 
 // {{ .Name.Singular.Title }}Repository ...
@@ -68,33 +68,6 @@ func (repository *{{ .Name.Singular.Title }}Repository) Get(ctx context.Context,
 	return _models, int64(count), nil
 }
 
-// GetAvailable{{ .Name.Singular.Title }}s ... Get {{ .Name.Singular.Title }} List
-func (repository *{{ .Name.Singular.Title }}Repository) GetAvailable{{ .Name.Singular.Title }}s(ctx context.Context, filters *[]Filter, order string, direction string, offset int64, limit int64) (*[]models.{{ .Name.Singular.Title }}, int64, error) {
-	_models := &[]models.{{ .Name.Singular.Title }}{}
-	if direction != "desc" {
-		direction = "asc"
-	}
-	q := repository.database.
-		NewSelect().
-		Model(_models)
-	q = WhereCurrentlyAvailable("{{ .Name.Plural.Snake }}", q)
-	if filters != nil {
-		q = ApplyFilters("{{ .Name.Plural.Snake }}", q, *filters)
-	}
-
-	q = q.Limit(int(limit)).Offset(int(offset)).Order(order + " " + direction)
-	count, err := q.ScanAndCount(ctx)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, 0, nil
-		}
-		return nil, 0, err
-	}
-
-	return _models, int64(count), nil
-
-}
-
 // Save ... Save {{ .Name.Singular.Title }}
 func (repository *{{ .Name.Singular.Title }}Repository) Save(ctx context.Context, model models.{{ .Name.Singular.Title }}) (*models.{{ .Name.Singular.Title }}, error) {
 	if model.ID == uuid.Nil {
@@ -115,6 +88,22 @@ func (repository *{{ .Name.Singular.Title }}Repository) Delete(ctx context.Conte
 	_, err := repository.database.NewDelete().
 		Where("? = ?", bun.Ident("{{ .Name.Plural.Snake }}.id"), id).Exec(ctx)
 
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteByFilters ... Delete {{ .Name.Singular.Title }}
+func (repository *{{ .Name.Singular.Title }}Repository) DeleteByFilters(ctx context.Context, filters *[]Filter) error {
+
+	q := repository.database.
+		NewDelete().
+		Model((*models.{{ .Name.Singular.Title }})(nil))
+	if filters != nil {
+		q = ApplyDeleteFilters("{{ .Name.Plural.Snake }}", q, *filters)
+	}
+	_, err := q.Exec(ctx)
 	if err != nil {
 		return err
 	}
