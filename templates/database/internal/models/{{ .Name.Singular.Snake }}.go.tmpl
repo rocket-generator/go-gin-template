@@ -3,10 +3,10 @@ package models
 import (
 	"time"
 
-	"github.com/bxcodec/faker/v3"
-{{- if .HasJSON }}
-    "gorm.io/datatypes"
-{{ end }}
+	"github.com/bxcodec/faker/v4"
+	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"time"
 {{- if .HasDecimal }}
     "github.com/shopspring/decimal"
 {{ end }}
@@ -20,7 +20,7 @@ type {{ .Name.Singular.Title }} struct {
 	UpdatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
 {{- if not .Primary }}
-    {{ .Name.Default.Title }} {{ .DataType.Default.Title }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:",nullzero,notnull" json:"{{ .Name.Original }}"{{if .FakerType }} faker:"{{ .FakerType }}"{{ end }}`
 {{- end }}
 {{- end }}
 {{- range .Relations}}

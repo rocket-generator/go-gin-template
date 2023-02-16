@@ -13,7 +13,7 @@ type {{ .Name.Default.Title }} struct {
 	UpdatedAt time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
 {{- if not .Primary }}
-    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:",nullzero,notnull" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:",nullzero,notnull"`
 {{- end }}
 {{- end }}
 }
