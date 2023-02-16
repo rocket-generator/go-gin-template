@@ -19,7 +19,7 @@ type {{ .Name.Singular.Title }} struct {
 	CreatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
-{{- if ne .Primary" }}
+{{- if ne .Primary }}
     {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
 {{- end }}
 {{- end }}
