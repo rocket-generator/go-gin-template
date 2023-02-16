@@ -4,5 +4,6 @@
   "date": "string",
   "boolean": "bool",
   "number": "float64",
-  "integer": "int64"
+  "integer": "int64",
+  "jsonb": "[]string"
 }
