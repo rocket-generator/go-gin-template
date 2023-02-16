@@ -2,11 +2,9 @@ package config
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"regexp"
-
-	"github.com/joho/godotenv"
 )
 
 const projectDirName = "go-gin-boilerplate"
@@ -16,9 +14,8 @@ func loadEnv() error {
 		err      error
 		envFile  string
 		env      = os.Getenv("GO_ENV")
-		re       = regexp.MustCompile(`^(.*` + projectDirName + `)`)
 		cwd, _   = os.Getwd()
-		rootPath = string(re.Find([]byte(cwd)))
+		rootPath = cwd
 	)
 
 	if env == "" {
