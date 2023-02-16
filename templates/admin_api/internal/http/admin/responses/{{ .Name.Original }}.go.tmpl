@@ -5,7 +5,7 @@ import "{{ .PackageName }}/internal/models"
 // {{ .Name.Singular.Title }} ... {{ .Description }}
 type {{ .Name.Singular.Title }} struct {
 {{- range .Columns }}
-{{ if .APIReturnable }}    {{.ObjectName}} {{.APIObjectType}} `json:"{{.Name.Original }}"`{{ end -}}
+{{ if .APIReturnable }}    {{.Name.Default.Title}} {{.APIObjectType}} `json:"{{.Name.Original }}"`{{ end -}}
 {{ end }}
     CreatedAt int64 `json:"created_at"`
     UpdatedAt int64 `json:"updated_at"`
@@ -20,11 +20,11 @@ func New{{ .Name.Singular.Title }}(model models.{{ .Name.Singular.Title }}) *{{ 
 {{- range .Columns }}
 {{- if not .IsSystemUseColumn }}
 {{- if eq .ObjectType "decimal.Decimal" }}
-{{ if .APIReturnable }}		{{.ObjectName}}: model.{{.ObjectName}}.String(),{{ end -}}
+{{ if .APIReturnable }}		{{.Name.Default.Title}}: model.{{.Name.Default.Title}}.String(),{{ end -}}
 {{- else if eq .ObjectType "datatypes.JSON"}}
-{{ if .APIReturnable }}		{{.ObjectName}}: string(model.{{.ObjectName}}),{{ end -}}
+{{ if .APIReturnable }}		{{.Name.Default.Title}}: string(model.{{.Name.Default.Title}}),{{ end -}}
 {{ else }}
-{{ if .APIReturnable }}		{{.ObjectName}}: model.{{.ObjectName}},{{ end -}}
+{{ if .APIReturnable }}		{{.Name.Default.Title}}: model.{{.Name.Default.Title}},{{ end -}}
 {{ end -}}
 {{- end -}}
 {{ end }}
