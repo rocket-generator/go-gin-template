@@ -131,6 +131,7 @@ func (handler *Handler) {{ .Name.Singular.Title }}Put(ctx *gin.Context) {
 		model.{{.Name.Default.Title}} = *update.{{.Name.Default.Title}}
 	}
 {{- end }}
+{{- end }}
 
 	resultModel, err := handler.{{ .Name.Singular.Camel }}Repository.Save(ctx, &model)
     if err != nil {
