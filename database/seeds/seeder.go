@@ -12,6 +12,10 @@ type Seed struct {
 
 // Execute ...
 func (seed *Seed) Execute(context context.Context) error {
+	err := NewAdminUserSeeder(seed.database).Execute(context)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -157,7 +157,7 @@ func (handler *Handler) {{ .Name.Singular.Title }}Delete(ctx *gin.Context) {
 		return
 	}
 
-	err = handler.{{ .Name.Singular.Camel }}Service.Delete{{ .Name.Singular.Title }}(ctx, id)
+	err = handler.{{ .Name.Singular.Camel }}Repository.Delete(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
 		return
