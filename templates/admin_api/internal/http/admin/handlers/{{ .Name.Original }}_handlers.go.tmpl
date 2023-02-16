@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	adminRequest "{{ .OrganizationName }}/internal/http/admin/requests"
+	"{{ .OrganizationName }}/internal/http/admin/requests"
 	adminResponse "{{ .OrganizationName }}/internal/http/admin/responses"
 	commonResponse "{{ .OrganizationName }}/internal/http/common/responses"
+	"{{ .OrganizationName }}/internal/models"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"strconv"
@@ -92,9 +93,9 @@ func (handler *Handler) {{ .Name.Plural.Title }}Post(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, commonResponse.NewInvalidParameterErrorStatus(err))
 		return
 	}
-	model := models.{{ .Name.Plural.Title }}{
+	model := models.{{ .Name.Singular.Title }}{
 {{- range .Columns }}
-{{ if .APIUpdatable }}    {{.Name.Default.Title}}: request.{{.Name.Default.Title}}{{ end -}}
+{{ if .APIUpdatable }}    {{.Name.Default.Title}}: request.{{.Name.Default.Title}},{{ end -}}
 {{ end }}
 	}
 	resultModel, err := handler.{{ .Name.Singular.Camel }}Repository.Save(ctx, model)
@@ -114,7 +115,7 @@ func (handler *Handler) {{ .Name.Singular.Title }}Put(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, commonResponse.NewInternalServerError(err))
 		return
 	}
-	_, err = handler.{{ .Name.Singular.Camel }}Repository.FindByID(ctx, id)
+	model, err := handler.{{ .Name.Singular.Camel }}Repository.FindByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
 		return
@@ -133,7 +134,7 @@ func (handler *Handler) {{ .Name.Singular.Title }}Put(ctx *gin.Context) {
 {{- end }}
 {{- end }}
 
-	resultModel, err := handler.{{ .Name.Singular.Camel }}Repository.Save(ctx, &model)
+	resultModel, err := handler.{{ .Name.Singular.Camel }}Repository.Save(ctx, *model)
     if err != nil {
 		ctx.JSON(http.StatusInternalServerError, commonResponse.NewInternalServerError(err))
 		return
