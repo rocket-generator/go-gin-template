@@ -3,13 +3,13 @@ package requests
 // {{ .Name.Singular.Title }}Create ... Object for create {{ .Name.Original }}
 type {{ .Name.Singular.Title }}Create struct {
 {{- range .Columns }}
-{{ if .APIUpdatable }}    {{.Name.Default.Title}} {{.APIObjectType}} `json:"{{.Name.Original}}"`{{ end -}}
+{{ if .APIUpdatable }}    {{.Name.Default.Title}} {{.APIType}} `json:"{{.Name.Original}}"`{{ end -}}
 {{ end }}
 }
 
 // {{ .Name.Singular.Title }}Update ... Object for update {{ .Name.Original }}
 type {{ .Name.Singular.Title }}Update struct {
 {{- range .Columns }}
-{{ if .APIUpdatable }}    {{.Name.Default.Title}} *{{.APIObjectType}} `json:"{{.Name.Original}}"`{{ end -}}
+{{ if .APIUpdatable }}    {{.Name.Default.Title}} *{{.APIType}} `json:"{{.Name.Original}}"`{{ end -}}
 {{ end }}
 }

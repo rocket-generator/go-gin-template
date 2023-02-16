@@ -5,7 +5,7 @@ import "{{ .PackageName }}/internal/models"
 // {{ .Name.Singular.Title }} ... {{ .Description }}
 type {{ .Name.Singular.Title }} struct {
 {{- range .Columns }}
-{{ if .APIReturnable }}    {{.Name.Default.Title}} {{.APIObjectType}} `json:"{{.Name.Original }}"`{{ end -}}
+{{ if .APIReturnable }}    {{.Name.Default.Title}} {{.APIType}} `json:"{{.Name.Original }}"`{{ end -}}
 {{ end }}
     CreatedAt int64 `json:"created_at"`
     UpdatedAt int64 `json:"updated_at"`
