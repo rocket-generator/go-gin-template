@@ -14,21 +14,20 @@ import (
 
 // {{ .Name.Singular.Title }} ... {{ .Description }}
 type {{ .Name.Singular.Title }} struct {
-	CreatedAt      time.Time `gorm:"column:created_at" json:"createdAt"`
-	UpdatedAt      time.Time `gorm:"column:updated_at" json:"updatedAt"`
+	bun.BaseModel `bun:"table:admin_users,alias:admin_users"`
+	ID            uuid.UUID `bun:",pk,type:uuid,nullzero,notnull,default:uuid_generate_v4()"`
+	CreatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt     time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
+{{- if ne .Primary" }}
     {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+{{- end }}
 {{- end }}
 {{- range .Relations}}
 {{- if eq .RelationType "belongsTo" }}
     {{ .ObjectName }} {{if .MultipleEntities }}[]{{end}}{{ .Entity.Name.Singular.Title }}
 {{- end -}}
 {{- end }}
-}
-
-// TableName sets the insert table name for this struct type
-func (entity *{{ .Name.Singular.Title }}) TableName() string {
-	return "{{ .Name.Original }}"
 }
 
 // GetFake{{ .Name.Singular.Title }} ... get fake {{ .Name.Singular.Title }} model

@@ -7,14 +7,15 @@ import (
 	"time"
 )
 
-type AdminUser struct {
+type {{ .Name.Default.Title }} struct {
 	ID        uuid.UUID `bun:",pk,type:uuid,nullzero,notnull,default:uuid_generate_v4()"`
 	CreatedAt time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt time.Time `bun:"type:timestamptz,nullzero,notnull,default:current_timestamp"`
 {{- range .Columns}}
-    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:"{{if .Primary }}primaryKey;{{end}}column:{{ .Name.Original }}" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
+{{- if ne .Primary" }}
+    {{ .Name.Default.Title }} {{ .ObjectType }} `bun:",nullzero,notnull" json:"{{ .Name.Original }}" faker:"{{ .FakerType }}"`
 {{- end }}
-
+{{- end }}
 }
 
 func init() {
