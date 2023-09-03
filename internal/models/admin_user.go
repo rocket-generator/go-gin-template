@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/bxcodec/faker/v4"
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"time"

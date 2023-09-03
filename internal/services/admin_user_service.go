@@ -32,7 +32,7 @@ type AdminUserService struct {
 	hashProvider        hash.ProviderInterface
 }
 
-type UserInfo struct {
+type AdminUserInfo struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
 }
@@ -66,7 +66,7 @@ func (service *AdminUserService) GetTokenFromEmailAndPassword(ctx context.Contex
 	}
 	result := service.hashProvider.CheckPasswordHash(password, adminUser.Password)
 	if result {
-		_token, err := service.tokenProvider.GenerateToken(adminUser.ID.String(), UserInfo{
+		_token, err := service.tokenProvider.GenerateToken(adminUser.ID.String(), AdminUserInfo{
 			ID:    adminUser.ID.String(),
 			Email: adminUser.Email,
 		})
